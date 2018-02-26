@@ -4,6 +4,20 @@
 /* Define to enable diagnostic debugging support. */
 /* #undef DEBUG */
 
+/* to save some RAM, this save 6912 bytes of heap. Be sure to encode your mp3 files as mono*/
+//#define COMPILE_MONO
+
+#ifdef COMPILE_MONO
+#define COMPILE_CHANNELS 1
+#endif
+#ifndef COMPILE_CHANNELS
+#define COMPILE_CHANNELS 2
+#elif COMPILE_CHANNELS > 2 || COMPILE_CHANNELS < 1
+#define COMPILE_CHANNELS 2
+#endif
+
+
+
 // Uncomment to show heap and stack space on entry
 #define stack(a,b,c)
 

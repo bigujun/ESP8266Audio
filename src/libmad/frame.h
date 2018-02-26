@@ -26,6 +26,8 @@
 # include "timer.h"
 # include "stream.h"
 
+# include "config.h"
+
 enum mad_layer {
   MAD_LAYER_I   = 1,			/* Layer I */
   MAD_LAYER_II  = 2,			/* Layer II */
@@ -69,14 +71,19 @@ struct mad_frame {
 
   int options;				/* decoding options (from stream) */
 
-  mad_fixed_t sbsample[2][36][32];	/* synthesis subband filter samples */
-  mad_fixed_t overlap[2][32][18];	/* Layer III block overlap data */
+  mad_fixed_t sbsample[COMPILE_CHANNELS][36][32];	/* synthesis subband filter samples */
+  mad_fixed_t overlap[COMPILE_CHANNELS][32][18];	/* Layer III block overlap data */
 
   mad_fixed_t xr_raw[576*2];
   mad_fixed_t tmp[576];
 };
 
+#if COMPILE_CHANNELS == 1
+# define MAD_NCHANNELS(header)		1
+#else
 # define MAD_NCHANNELS(header)		((header)->mode ? 2 : 1)
+#endif
+
 # define MAD_NSBSAMPLES(header)  \
   ((header)->layer == MAD_LAYER_I ? 12 :  \
    (((header)->layer == MAD_LAYER_III &&  \

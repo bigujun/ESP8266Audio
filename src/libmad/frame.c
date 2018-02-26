@@ -489,14 +489,20 @@ void mad_frame_mute(struct mad_frame *frame)
   for (s = 0; s < 36; ++s) {
     for (sb = 0; sb < 32; ++sb) {
       frame->sbsample[0][s][sb] =
-      frame->sbsample[1][s][sb] = 0;
+      #if COMPILE_CHANNELS > 1
+      frame->sbsample[1][s][sb] =
+      #endif
+      0;
     }
   }
 
   for (s = 0; s < 18; ++s) {
     for (sb = 0; sb < 32; ++sb) {
 	frame->overlap[0][sb][s] =
-	frame->overlap[1][sb][s] = 0;
+        #if COMPILE_CHANNELS > 1
+	frame->overlap[1][sb][s] =
+        #endif
+        0;
     }
   }
 }
