@@ -24,6 +24,7 @@
 extern "C" {
 # endif
 
+#  include "config.h"
 
 # define SIZEOF_INT 4
 # define SIZEOF_LONG 4
@@ -283,7 +284,7 @@ mad_fixed_t mad_f_mul_inline(mad_fixed_t x, mad_fixed_t y)
 
 # elif defined(FPM_ARM)
 
-/* 
+/*
  * This ARM V4 version is as accurate as FPM_64BIT but much faster. The
  * least significant bit is properly rounded at no CPU cycle cost!
  */
@@ -789,14 +790,19 @@ struct mad_frame {
 
   int options;				/* decoding options (from stream) */
 
-  mad_fixed_t sbsample[2][36][32];	/* synthesis subband filter samples */
-  mad_fixed_t overlap[2][32][18];	/* Layer III block overlap data */
+  mad_fixed_t sbsample[COMPILE_CHANNELS][36][32];	/* synthesis subband filter samples */
+  mad_fixed_t overlap[COMPILE_CHANNELS][32][18];	/* Layer III block overlap data */
 
   mad_fixed_t xr_raw[576*2];
   mad_fixed_t tmp[576];
 };
 
+#if COMPILE_CHANNELS == 1
+# define MAD_NCHANNELS(header)		1
+#else
 # define MAD_NCHANNELS(header)		((header)->mode ? 2 : 1)
+#endif
+
 # define MAD_NSBSAMPLES(header)  \
   ((header)->layer == MAD_LAYER_I ? 12 :  \
    (((header)->layer == MAD_LAYER_III &&  \

@@ -1,7 +1,7 @@
 /*
   AudioGeneratorMP3
   Wrap libmad MP3 library to play audio
-  
+
   Copyright (C) 2017  Earle F. Philhower, III
 
   This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,8 @@
 
 
 #include "AudioGeneratorMP3.h"
+
+//#define MEMORY_DEBUG
 
 AudioGeneratorMP3::AudioGeneratorMP3()
 {
@@ -52,7 +54,7 @@ AudioGeneratorMP3::~AudioGeneratorMP3()
     free(synth);
     free(frame);
     free(stream);
-  } 
+  }
 }
 
 
@@ -151,7 +153,7 @@ bool AudioGeneratorMP3::GetOneSample(int16_t sample[2])
     output->SetChannels(synth->pcm.channels);
     lastChannels = synth->pcm.channels;
   }
-    
+
   // If we're here, we have one decoded frame and sent 0 or more samples out
   if (samplePtr < synth->pcm.length) {
     sample[AudioOutput::LEFTCHANNEL ] = synth->pcm.samples[0][samplePtr];
@@ -159,7 +161,7 @@ bool AudioGeneratorMP3::GetOneSample(int16_t sample[2])
     samplePtr++;
   } else {
     samplePtr = 0;
-    
+
     switch ( mad_synth_frame_onens(synth, frame, nsCount++) ) {
         case MAD_FLOW_STOP:
         case MAD_FLOW_BREAK: Serial.printf_P(PSTR("msf1ns failed\n"));
@@ -256,6 +258,17 @@ bool AudioGeneratorMP3::begin(AudioFileSource *source, AudioOutput *output)
       return false;
     }
   } else {
+        #ifdef MEMORY_DEBUG
+        int total = buffLen+sizeof(struct mad_stream)+sizeof(struct mad_frame)+sizeof(struct mad_synth);
+        Serial.printf_P("Aloccating:\n\tBuff \t%d\n\tStream\t%d\n\tFrame\t%d\n\tSynth\t%d\n\tTotal:\t%d\n\tLivre:\t%d\n\tApos:\t%d\n",
+                  buffLen,
+                  sizeof(struct mad_stream),
+                  sizeof(struct mad_frame),
+                  sizeof(struct mad_synth),
+                  total,
+                  ESP.getFreeHeap(),
+                  ESP.getFreeHeap()-total);
+        #endif
     buff = reinterpret_cast<unsigned char *>(malloc(buffLen));
     stream = reinterpret_cast<struct mad_stream *>(malloc(sizeof(struct mad_stream)));
     frame = reinterpret_cast<struct mad_frame *>(malloc(sizeof(struct mad_frame)));
@@ -272,14 +285,14 @@ bool AudioGeneratorMP3::begin(AudioFileSource *source, AudioOutput *output)
       return false;
     }
   }
- 
+
   mad_stream_init(stream);
   mad_frame_init(frame);
   mad_synth_init(synth);
   synth->pcm.length = 0;
   mad_stream_options(stream, 0); // TODO - add options support
   madInitted = true;
- 
+
   running = true;
   return true;
 }
@@ -346,4 +359,3 @@ extern "C" {
   }
 #endif
 }
-
