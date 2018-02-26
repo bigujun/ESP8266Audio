@@ -5,7 +5,8 @@
 /* #undef DEBUG */
 
 /* to save some RAM, this save 6912 bytes of heap. Be sure to encode your mp3 files as mono*/
-//#define COMPILE_CHANNELS 1
+//#define COMPILE_MONO
+
 #ifdef COMPILE_MONO
 #define COMPILE_CHANNELS 1
 #endif
